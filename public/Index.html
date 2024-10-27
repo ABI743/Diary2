@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Treasured Scribbles</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <main id="app">
+            <h1>Treasured Scribbles</h1>
+            
+            <div id="home-view">
+                <p>Hi 👋 from Abin, feel free to add any memories or writings to the Treasured Scribbles.</p>
+                <div class="button-container">
+                    <button onclick="setView('writePassword')" class="btn btn-primary">Write</button>
+                    <button onclick="setView('readPassword')" class="btn btn-secondary">View</button>
+                </div>
+            </div>
+
+            <div id="password-view" style="display: none;">
+                <h2 id="password-title">Enter Password</h2>
+                <input type="password" id="password-input" placeholder="Enter password">
+                <button onclick="handlePasswordSubmit()" class="btn btn-primary">Submit</button>
+                <button onclick="setView('home')" class="btn btn-gray">Back</button>
+            </div>
+
+            <div id="write-view" style="display: none;">
+                <h2>Write a New Entry</h2>
+                <input type="text" id="name-input" placeholder="Your Name">
+                <textarea id="message-input" placeholder="Your Message" rows="4"></textarea>
+                <div>
+                    <h3>Your Signature:</h3>
+                    <canvas id="signature-pad"></canvas>
+                    <button onclick="clearSignature()" class="btn btn-red">Clear Signature</button>
+                </div>
+                <button onclick="handleEntrySubmit()" class="btn btn-primary">Save Entry</button>
+                <button onclick="setView('home')" class="btn btn-gray">Back</button>
+            </div>
+
+            <div id="read-view" style="display: none;">
+                <h2>View Entries</h2>
+                <div id="entries-container"></div>
+                <button onclick="setView('home')" class="btn btn-gray">Back</button>
+            </div>
+        </main>
+    </div>
+    <script src="script.js"></script>
+</body>
+                  </html>
