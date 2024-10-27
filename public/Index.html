@@ -4,49 +4,203 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Treasured Scribbles</title>
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            width: 100%;
+        }
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+        p {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .button-container {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+        }
+        button {
+            padding: 0.5rem 1rem;
+            font-size: 1rem;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            opacity: 0.9;
+        }
+        .write-btn {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .view-btn {
+            background-color: #008CBA;
+            color: white;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 0.5rem;
+            margin-bottom: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        #signature-pad {
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            margin-bottom: 1rem;
+        }
+        .entry {
+            border: 1px solid #ccc;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-radius: 4px;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
-        <main id="app">
+        <div id="home-view">
             <h1>Treasured Scribbles</h1>
-            
-            <div id="home-view">
-                <p>Hi 👋 from Abin, feel free to add any memories or writings to the Treasured Scribbles.</p>
-                <div class="button-container">
-                    <button onclick="setView('writePassword')" class="btn btn-primary">Write</button>
-                    <button onclick="setView('readPassword')" class="btn btn-secondary">View</button>
-                </div>
+            <p>Hi 👋 from Abin, feel free to add any memories or writings to the Treasured Scribbles.</p>
+            <div class="button-container">
+                <button class="write-btn" onclick="showPasswordPrompt('write')">Write</button>
+                <button class="view-btn" onclick="showPasswordPrompt('read')">View</button>
             </div>
+        </div>
 
-            <div id="password-view" style="display: none;">
-                <h2 id="password-title">Enter Password</h2>
-                <input type="password" id="password-input" placeholder="Enter password">
-                <button onclick="handlePasswordSubmit()" class="btn btn-primary">Submit</button>
-                <button onclick="setView('home')" class="btn btn-gray">Back</button>
-            </div>
+        <div id="password-view" class="hidden">
+            <h2 id="password-prompt">Enter Password</h2>
+            <input type="password" id="password-input" placeholder="Enter password">
+            <button onclick="verifyPassword()">Submit</button>
+            <button onclick="showView('home-view')">Back</button>
+        </div>
 
-            <div id="write-view" style="display: none;">
-                <h2>Write a New Entry</h2>
-                <input type="text" id="name-input" placeholder="Your Name">
-                <textarea id="message-input" placeholder="Your Message" rows="4"></textarea>
-                <div>
-                    <h3>Your Signature:</h3>
-                    <canvas id="signature-pad"></canvas>
-                    <button onclick="clearSignature()" class="btn btn-red">Clear Signature</button>
-                </div>
-                <button onclick="handleEntrySubmit()" class="btn btn-primary">Save Entry</button>
-                <button onclick="setView('home')" class="btn btn-gray">Back</button>
-            </div>
+        <div id="write-view" class="hidden">
+            <h2>Leave Your Autograph</h2>
+            <input type="text" id="name-input" placeholder="Your Name">
+            <textarea id="message-input" placeholder="Your Message" rows="4"></textarea>
+            <canvas id="signature-pad"></canvas>
+            <button onclick="clearSignature()">Clear Signature</button>
+            <button onclick="submitAutograph()">Submit Autograph</button>
+            <button onclick="showView('home-view')">Back</button>
+        </div>
 
-            <div id="read-view" style="display: none;">
-                <h2>View Entries</h2>
-                <div id="entries-container"></div>
-                <button onclick="setView('home')" class="btn btn-gray">Back</button>
-            </div>
-        </main>
+        <div id="read-view" class="hidden">
+            <h2>View Autographs</h2>
+            <div id="entries-container"></div>
+            <button onclick="showView('home-view')">Back</button>
+        </div>
     </div>
-    <script src="script.js"></script>
+
+    <script>
+        let currentView = 'home-view';
+        let signaturePad;
+        const writePassword = 'Treasure123';
+        const readPassword = 'ABIN1john';
+        let entries = [];
+
+        function showView(viewId) {
+            document.getElementById(currentView).classList.add('hidden');
+            document.getElementById(viewId).classList.remove('hidden');
+            currentView = viewId;
+
+            if (viewId === 'write-view' && !signaturePad) {
+                const canvas = document.getElementById('signature-pad');
+                signaturePad = new SignaturePad(canvas);
+            }
+        }
+
+        function showPasswordPrompt(action) {
+            document.getElementById('password-prompt').textContent = `Enter Password to ${action === 'write' ? 'Write' : 'View'}`;
+            showView('password-view');
+            localStorage.setItem('action', action);
+        }
+
+        function verifyPassword() {
+            const password = document.getElementById('password-input').value;
+            const action = localStorage.getItem('action');
+            
+            if ((action === 'write' && password === writePassword) || 
+                (action === 'read' && password === readPassword)) {
+                showView(action === 'write' ? 'write-view' : 'read-view');
+                if (action === 'read') displayEntries();
+            } else {
+                alert('Incorrect password');
+            }
+            document.getElementById('password-input').value = '';
+        }
+
+        function clearSignature() {
+            signaturePad.clear();
+        }
+
+        function submitAutograph() {
+            const name = document.getElementById('name-input').value;
+            const message = document.getElementById('message-input').value;
+            
+            if (name && message && !signaturePad.isEmpty()) {
+                const newEntry = {
+                    name: name,
+                    message: message,
+                    signature: signaturePad.toDataURL(),
+                    date: new Date().toLocaleString()
+                };
+                entries.push(newEntry);
+                localStorage.setItem('entries', JSON.stringify(entries));
+                
+                document.getElementById('name-input').value = '';
+                document.getElementById('message-input').value = '';
+                signaturePad.clear();
+                alert('Autograph saved successfully!');
+            } else {
+                alert('Please fill all fields and sign');
+            }
+        }
+
+        function displayEntries() {
+            const entriesContainer = document.getElementById('entries-container');
+            entriesContainer.innerHTML = '';
+            entries = JSON.parse(localStorage.getItem('entries')) || [];
+            
+            entries.forEach((entry) => {
+                const entryDiv = document.createElement('div');
+                entryDiv.className = 'entry';
+                entryDiv.innerHTML = `
+                    <h3>${entry.name}</h3>
+                    <p>${entry.message}</p>
+                    <img src="${entry.signature}" alt="Signature">
+                    <p>Date: ${entry.date}</p>
+                `;
+                entriesContainer.appendChild(entryDiv);
+            });
+        }
+
+        window.onload = function() {
+            showView('home-view');
+        };
+    </script>
 </body>
-                  </html>
+</html>
