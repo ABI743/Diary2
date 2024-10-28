@@ -55,7 +55,7 @@ async function handleEntrySubmit() {
     const message = document.getElementById('message-input').value;
     const password = document.getElementById('password-input').value;
 
-    if (name && message && signaturePad && !signaturePad.isEmpty()) {
+    if (name && message && !signaturePad.isEmpty()) {
         const newEntry = {
             name: name,
             message: message,
@@ -76,7 +76,6 @@ async function handleEntrySubmit() {
                 document.getElementById('message-input').value = '';
                 signaturePad.clear();
                 alert('Autograph saved successfully!');
-                setView('home');
             } else {
                 alert('Failed to save entry. Please try again.');
             }
