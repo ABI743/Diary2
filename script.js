@@ -26,6 +26,8 @@ async function handlePasswordSubmit() {
     const password = document.getElementById('password-input').value;
     const type = currentView === 'writePassword' ? 'write' : 'read';
 
+    showLoading();
+
     try {
         const response = await fetch('/api/verify-password', {
             method: 'POST',
@@ -45,6 +47,8 @@ async function handlePasswordSubmit() {
     } catch (error) {
         console.error('Error:', error);
         alert('An error occurred. Please try again.');
+    } finally {
+        hideLoading();
     }
 
     document.getElementById('password-input').value = '';
@@ -55,13 +59,15 @@ async function handleEntrySubmit() {
     const message = document.getElementById('message-input').value;
     const password = document.getElementById('password-input').value;
 
-    if (name && message && !signaturePad.isEmpty()) {
+    if (name && message && signaturePad && !signaturePad.isEmpty()) {
         const newEntry = {
             name: name,
             message: message,
             signature: signaturePad.toDataURL(),
             date: new Date().toLocaleString()
         };
+
+        showLoading();
 
         try {
             const response = await fetch('/api/entries', {
@@ -76,12 +82,15 @@ async function handleEntrySubmit() {
                 document.getElementById('message-input').value = '';
                 signaturePad.clear();
                 alert('Autograph saved successfully!');
+                setView('home');
             } else {
                 alert('Failed to save entry. Please try again.');
             }
         } catch (error) {
             console.error('Error:', error);
             alert('An error occurred. Please try again.');
+        } finally {
+            hideLoading();
         }
     } else {
         alert('Please fill all fields and sign');
@@ -95,6 +104,8 @@ function clearSignature() {
 }
 
 async function displayEntries(password) {
+    showLoading();
+
     try {
         const response = await fetch('/api/read-entries', {
             method: 'POST',
@@ -120,6 +131,22 @@ async function displayEntries(password) {
     } catch (error) {
         console.error('Error:', error);
         alert('Failed to load entries. Please try again.');
+    } finally {
+        hideLoading();
+    }
+}
+
+function showLoading() {
+    const loadingDiv = document.createElement('div');
+    loadingDiv.className = 'loading';
+    loadingDiv.textContent = 'Loading';
+    document.body.appendChild(loadingDiv);
+}
+
+function hideLoading() {
+    const loadingDiv = document.querySelector('.loading');
+    if (loadingDiv) {
+        loadingDiv.remove();
     }
 }
 
